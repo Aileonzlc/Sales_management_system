@@ -3,7 +3,6 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponse
 
-
 # 导入 Customer 对象定义
 from common.models import Customer
 
@@ -33,13 +32,25 @@ th, td {
         <th>地址</th>
         </tr>
 
-        %s
+        {% for customer in customers %}
+            <tr>
 
+            {% for name, value in customer.items %}            
+                <td>{{ value }}</td>            
+            {% endfor %}
+
+            </tr>
+        {% endfor %}
 
         </table>
     </body>
 </html>
 '''
+
+from django.template import engines
+
+django_engine = engines['django']
+template = django_engine.from_string(html_template)
 
 
 def listcustomers(request):
@@ -53,14 +64,7 @@ def listcustomers(request):
     if ph:
         qs = qs.filter(phonenumber=ph)
 
-    # 生成html模板中要插入的html片段内容
-    tableContent = ''
-    for customer in qs:
-        tableContent += '<tr>'
+    # 传入渲染模板需要的参数
+    rendered = template.render({'customers': qs})
 
-        for name, value in customer.items():
-            tableContent += f'<td>{value}</td>'
-
-        tableContent += '</tr>'
-
-    return HttpResponse(html_template % tableContent)
+    return HttpResponse(rendered)
