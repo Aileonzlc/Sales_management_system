@@ -34,7 +34,7 @@ class Order(models.Model):
     create_date = models.DateTimeField(default=datetime.datetime.now)
     # 客户
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
-    # 订单购买的药品，和Medicine表是多对多 的关系
+    # 订单购买的药品，和Medicine表是多对多 的关系,多对多关系 是 通过另外一张表， 也就是 through 参数 指定的 OrderMedicine 表 来确定的。
     medicines = models.ManyToManyField(Medicine, through='OrderMedicine')
 
 
