@@ -34,3 +34,13 @@ class Order(models.Model):
     create_date = models.DateTimeField(default=datetime.datetime.now)
     # 客户
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    # 订单购买的药品，和Medicine表是多对多 的关系
+    medicines = models.ManyToManyField(Medicine, through='OrderMedicine')
+
+
+class OrderMedicine(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    medicine = models.ForeignKey(Medicine, on_delete=models.PROTECT)
+
+    # 订单中药品的数量
+    amount = models.PositiveIntegerField()
