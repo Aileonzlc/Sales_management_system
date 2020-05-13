@@ -1,11 +1,12 @@
 from django.http import JsonResponse
+
+# 导入 Medicine 对象定义
+from common.models import Medicine
+
 import json
-from common.models import Customer
 
 
 def dispatcher(request):
-    # 将请求参数统一放入request 的 params 属性中，方便后续处理
-
     # 根据session判断用户是否是登录的管理员用户
     if 'usertype' not in request.session:
         return JsonResponse({
@@ -13,6 +14,7 @@ def dispatcher(request):
             'msg': '未登录',
             'redirect': '/mgr/sign.html'},
             status=302)
+
     if request.session['usertype'] != 'mgr':
         return JsonResponse({
             'ret': 302,
@@ -20,7 +22,9 @@ def dispatcher(request):
             'redirect': '/mgr/sign.html'},
             status=302)
 
-    # GET请求 参数在url中，同过request 对象的 GET属性获取
+    # 将请求参数统一放入request 的 params 属性中，方便后续处理
+
+    # GET请求 参数 在 request 对象的 GET属性中
     if request.method == 'GET':
         request.params = request.GET
 
@@ -29,26 +33,27 @@ def dispatcher(request):
         # 根据接口，POST/PUT/DELETE 请求的消息体都是 json格式
         request.params = json.loads(request.body)
 
-    #  确保action有被赋值
+    # 确保action有被赋值
     action = request.params.get('action', None)
     if not action:
         return JsonResponse({'ret': 1, 'msg': '不支持该类型http请求'})
-    # 根据不同的action分派给不同的函数进行处理,
-    if action == 'list_customer':
-        return listcustomers(request)
-    elif action == 'add_customer':
-        return addcustomer(request)
-    elif action == 'modify_customer':
-        return modifycustomer(request)
-    elif action == 'del_customer':
-        return deletecustomer(request)
+    # 根据不同的action分派给不同的函数进行处理
+    if action == 'list_medicine':
+        return listmedicine(request)
+    elif action == 'add_medicine':
+        return addmedicine(request)
+    elif action == 'modify_medicine':
+        return modifymedicine(request)
+    elif action == 'del_medicine':
+        return deletemedicine(request)
+
     else:
         return JsonResponse({'ret': 1, 'msg': '不支持该类型http请求'})
 
 
-def listcustomers(request):
+def listmedicine(request):
     # 返回一个 QuerySet 对象 ，包含所有的表记录
-    qs = Customer.objects.values()
+    qs = Medicine.objects.values()
 
     # 将 QuerySet 对象 转化为 list 类型
     # 否则不能 被 转化为 JSON 字符串
@@ -57,60 +62,59 @@ def listcustomers(request):
     return JsonResponse({'ret': 0, 'retlist': retlist})
 
 
-def addcustomer(request):
+def addmedicine(request):
     info = request.params['data']
 
     # 从请求消息中 获取要添加客户的信息
     # 并且插入到数据库中
-    # 返回值 就是对应插入记录的对象
-    record = Customer.objects.create(name=info['name'],
-                                     phonenumber=info['phonenumber'],
-                                     address=info['address'])
+    medicine = Medicine.objects.create(name=info['name'],
+                                       sn=info['sn'],
+                                       desc=info['desc'])
+    return JsonResponse({'ret': 0, 'id': medicine.id})
 
-    return JsonResponse({'ret': 0, 'id': record.id})
 
-def modifycustomer(request):
+def modifymedicine(request):
     # 从请求消息中 获取修改客户的信息
     # 找到该客户，并且进行修改操作
 
-    customerid = request.params['id']
+    medicineid = request.params['id']
     newdata = request.params['newdata']
 
     try:
         # 根据 id 从数据库中找到相应的客户记录
-        customer = Customer.objects.get(id=customerid)
-    except Customer.DoesNotExist:
-        return JsonResponse({
+        medicine = Medicine.objects.get(id=medicineid)
+    except Medicine.DoesNotExist:
+        return {
             'ret': 1,
-            'msg': f'id 为{customerid}的客户不存在'
-        })
+            'msg': f'id 为`{medicineid}`的药品不存在'
+        }
 
     if 'name' in newdata:
-        customer.name = newdata['name']
-    if 'phonenumber' in newdata:
-        customer.phonenumber = newdata['phonenumber']
-    if 'address' in newdata:
-        customer.address = newdata['address']
+        medicine.name = newdata['name']
+    if 'sn' in newdata:
+        medicine.sn = newdata['sn']
+    if 'desc' in newdata:
+        medicine.desc = newdata['desc']
 
     # 注意，一定要执行save才能将修改信息保存到数据库
-    customer.save()
+    medicine.save()
 
     return JsonResponse({'ret': 0})
 
-def deletecustomer(request):
 
-    customerid = request.params['id']
+def deletemedicine(request):
+    medicineid = request.params['id']
 
     try:
-        # 根据 id 从数据库中找到相应的客户记录
-        customer = Customer.objects.get(id=customerid)
-    except Customer.DoesNotExist:
-        return JsonResponse({
-                'ret': 1,
-                'msg': f'id 为{customerid}的客户不存在'
-        })
+        # 根据 id 从数据库中找到相应的药品记录
+        medicine = Medicine.objects.get(id=medicineid)
+    except Medicine.DoesNotExist:
+        return {
+            'ret': 1,
+            'msg': f'id 为`{medicineid}`的客户不存在'
+        }
 
     # delete 方法就将该记录从数据库中删除了
-    customer.delete()
+    medicine.delete()
 
     return JsonResponse({'ret': 0})
