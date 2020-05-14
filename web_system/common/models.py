@@ -37,6 +37,9 @@ class Order(models.Model):
     # 订单购买的药品，和Medicine表是多对多 的关系,多对多关系 是 通过另外一张表， 也就是 through 参数 指定的 OrderMedicine 表 来确定的。
     medicines = models.ManyToManyField(Medicine, through='OrderMedicine')
 
+    # 为了提高效率，这里存放 订单 medicines 冗余数据
+    medicinelist = models.CharField(max_length=2000, null=True, blank=True)
+
 
 class OrderMedicine(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
@@ -51,7 +54,7 @@ class Country(models.Model):
 
 # 学生表， country 字段是国家表的外键，形成一对多的关系
 class Student(models.Model):
-    name    = models.CharField(max_length=100)
-    grade   = models.PositiveSmallIntegerField()
+    name = models.CharField(max_length=100)
+    grade = models.PositiveSmallIntegerField()
     country = models.ForeignKey(Country,
                                 on_delete=models.PROTECT)
