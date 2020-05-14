@@ -1,20 +1,50 @@
 from django.http import JsonResponse
-
+import traceback
 # 导入 Medicine 对象定义
-from common.models import Medicine
-
-import json
+from common.models import Medicine, OrderMedicine
+from django.db import transaction
+# 增加对分页的支持
+from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Q
 
 
 def listmedicine(request):
-    # 返回一个 QuerySet 对象 ，包含所有的表记录
-    qs = Medicine.objects.values()
+    try:
+        # .order_by('-id') 表示按照 id字段的值 倒序排列
+        # 这样可以保证最新的记录显示在最前面
+        qs = Medicine.objects.values().order_by('-id')
 
-    # 将 QuerySet 对象 转化为 list 类型
-    # 否则不能 被 转化为 JSON 字符串
-    retlist = list(qs)
+        # 查看是否有 关键字 搜索 参数
+        keywords = request.params.get('keywords', None)
+        if keywords:
+            conditions = [Q(name__contains=one) for one in keywords.split(' ') if one]
+            query = Q()
+            for condition in conditions:
+                query &= condition
+            qs = qs.filter(query)
 
-    return JsonResponse({'ret': 0, 'retlist': retlist})
+        # 要获取的第几页
+        pagenum = request.params['pagenum']
+
+        # 每页要显示多少条记录
+        pagesize = request.params['pagesize']
+
+        # 使用分页对象，设定每页多少条记录
+        pgnt = Paginator(qs, pagesize)
+
+        # 从数据库中读取数据，指定读取其中第几页
+        page = pgnt.page(pagenum)
+
+        # 将 QuerySet 对象 转化为 list 类型
+        retlist = list(page)
+
+        # total指定了 一共有多少数据
+        return JsonResponse({'ret': 0, 'retlist': retlist, 'total': pgnt.count})
+
+    except EmptyPage:
+        return JsonResponse({'ret': 0, 'retlist': [], 'total': 0})
+    except Exception:
+        return JsonResponse({'ret': 2, 'msg': f'未知错误\n{traceback.format_exc()}'})
 
 
 def addmedicine(request):
@@ -68,9 +98,11 @@ def deletemedicine(request):
             'ret': 1,
             'msg': f'id 为`{medicineid}`的客户不存在'
         }
-
-    # delete 方法就将该记录从数据库中删除了
-    medicine.delete()
+    with transaction.atomic():
+        # 一定要先删除 OrderMedicine 里面的记录
+        OrderMedicine.objects.filter(medicine_id=medicineid).delete()
+        # delete 方法就将该记录从数据库中删除了
+        medicine.delete()
 
     return JsonResponse({'ret': 0})
 
@@ -84,6 +116,6 @@ Action2Handler = {
     'del_medicine': deletemedicine,
 }
 
+
 def dispatcher(request):
     return dispatcherBase(request, Action2Handler)
-
