@@ -24,7 +24,7 @@ os.path.join(BASE_DIR)
 SECRET_KEY = '7em!u2lw(-ak^njawzy@(byvt)#c6gjj8dt-wv!jzcnhsue$rj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -79,9 +79,21 @@ WSGI_APPLICATION = 'web_system.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'web_system',  # 数据库名
+        'USER': 'zlc',  # 数据库 用户名
+        'PASSWORD': 'Zlc123!!',  # 数据库 用户密码
+        'HOST': '127.0.0.1',  # 数据库服务主机名
+        'PORT': '3306',  # 数据库服务端口
+        'CONN_MAX_AGE': 0,
+        'OPTIONS': {
+            "init_command": "SET storage_engine=INNODB",
+        }
     }
 }
 
