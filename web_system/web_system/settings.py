@@ -87,13 +87,13 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'web_system',  # 数据库名
         'USER': 'zlc',  # 数据库 用户名
-        'PASSWORD': 'Zlc123!!',  # 数据库 用户密码
+        'PASSWORD': '767872313',  # 数据库 用户密码
         'HOST': '127.0.0.1',  # 数据库服务主机名
         'PORT': '3306',  # 数据库服务端口
         'CONN_MAX_AGE': 0,
-        'OPTIONS': {
-            "init_command": "SET storage_engine=INNODB",
-        }
+        # 'OPTIONS': {
+        #     "init_command": "SET storage_engine=INNODB",
+        # }
     }
 }
 
