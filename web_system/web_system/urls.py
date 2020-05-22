@@ -27,4 +27,4 @@ urlpatterns = [
     # 凡是 url 以 api/mgr  开头的，
     # 都根据 mgr.urls 里面的 子路由表进行路由
     path('api/mgr/', include('mgr.urls')),
-] +  static("/", document_root="./z_dist/z_dist") # url 不是以 admin/ sales/ api/mgr/ 开头， Django 就会认为是要访问./z_dist/z_dist目录下面的静态文件。
+] + static("/", document_root="./z_dist/z_dist") # url 不是以 admin/ sales/ api/mgr/ 开头， Django 就会认为是要访问./z_dist/z_dist目录下面的静态文件。

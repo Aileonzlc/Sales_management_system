@@ -5,6 +5,4 @@ echo $DIR
 cd $DIR
 
 # ulimit -n 50000
-nohup gunicorn --config=bysms/gunicorn_conf.py bysms.wsgi &> /dev/null &
-
-VERSION = '1.5'
+nohup gunicorn web_system.wsgi:application --config=web_system/gunicorn_conf.py &> /dev/null &

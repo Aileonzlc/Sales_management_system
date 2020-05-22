@@ -8,7 +8,7 @@ workers = 3
 worker_class = "gevent"
 
 # 日志文件路径
-errorlog = "/home/byhy/gunicorn.log"
+errorlog = "/home/aileon/gunicorn.log"
 loglevel = "info"
 
 import os
